@@ -1,0 +1,6 @@
+# Local virtual environment
+pyopengl-3.8.6/
+.python-version
+
+# User specific VS-Code settings
+.vscode/
