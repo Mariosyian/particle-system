@@ -6,8 +6,9 @@ The idea behind the particle system is to create a dog heaven filled with bouncy
 
 This README file will be updated along the way with illustrations, 3D mockups and a demo video.
 
-Paper illustration: ![doggo_heaven_paper](./assets/images/paper_illustration.jpg)
-2D PyOpenGL illustration (before addition of `pygame`): ![doggo_heaven_2d](./assets/images/2d_illustration.jpg)
+Paper illustration: ![doggo_heaven_paper](./assets/images/README/paper_illustration.jpg)
+2D PyOpenGL illustration (before addition of `pygame`): ![doggo_heaven_2d](./assets/images/README/2d_illustration.jpg)
+2D PyGame illustration: ![doggo_heaven_2d_pygame](./assets/images/README/2d_illustration_pygame.jpg)
 
 # Requirements
 
