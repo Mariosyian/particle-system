@@ -8,6 +8,7 @@ from os import environ
 
 environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 
+from gc import collect
 import pygame
 
 from libraries import colors, vertices
@@ -25,24 +26,23 @@ class Doggo_Heaven:
     player_group = pygame.sprite.Group()
     tennis_ball_group = pygame.sprite.Group()
 
+    clock = None
+    window = None
+
     def _initialise(self):
         """
-        Initialise the `pygame` library and create the games window and internal clock.
-
-        :returns: The internal clock and game window as a tuple.
+        Initialise the `pygame` library and updates the games window and internal
+        clock.
         """
-        pygame.init()
-        clock = pygame.time.Clock()
-        window = pygame.display.set_mode(SCREEN)
-        pygame.display.set_caption(f"Doggo Heaven - {int(clock.get_fps())} FPS")
+        self.clock = pygame.time.Clock()
+        self.window = pygame.display.set_mode(SCREEN)
+        pygame.display.set_caption(f"Doggo Heaven - {int(self.clock.get_fps())} FPS")
         pygame.display.set_icon(pygame.image.load("assets/images/icon.ico").convert())
-
-        return (clock, window)
 
     def _create_background_objects(self):
         """
-        Creates all background objects as sprites and adds them to the `background_objects`
-        sprite group.
+        Creates all background objects as sprites and adds them to the
+        `background_objects` sprite group.
         """
         # cloud_1
         cloud_1 = vertices.cloud_1
@@ -146,18 +146,38 @@ class Doggo_Heaven:
         )
         del ground
 
+    def _reset(self):
+        """Reset the program (Garbage collection)."""
+        del self.clock
+        del self.window
+
+        for surface in self.background_group:
+            del surface
+        self.background_group.empty()
+
+        for surface in self.tennis_ball_group:
+            del surface
+        self.tennis_ball_group.empty()
+
+        for surface in self.player_group:
+            del surface
+        self.player_group.empty()
+
+        collect(generation=2)
+        # TODO: Previous `main()` instance is still alive, hence the 0.1MB of RAM
+        #       increase on `reset()`
+        self.main()
+
     def main(self):
-        """
-        Run the program.
-        """
-        clock, window = self._initialise()
+        """Run the program."""
+        self._initialise()
         FPS = GOLDEN_FPS
 
         # Sprites
         ## Sky
         background = pygame.Surface(SCREEN).convert()
         pygame.Surface.fill(background, colors.SKY)
-        window.blit(background, (0, 0))
+        self.window.blit(background, (0, 0))
 
         ## Bakcground
         self._create_background_objects()
@@ -166,16 +186,16 @@ class Doggo_Heaven:
         tennis_ball_img = pygame.image.load(
             "assets/images/models/tennis_ball/tennis_ball_25x25.png"
         ).convert_alpha()
-        for i in range(10):
+        for i in range(NUM_OF_BALLS):
             self.tennis_ball_group.add(
                 Tennis_Ball(
                     tennis_ball_img,
                     tennis_ball_img.get_width(),
                     tennis_ball_img.get_height(),
-                    50 + (i * 100),
+                    tennis_ball_img.get_width() + i * (WINDOW_WIDTH / NUM_OF_BALLS),
                     200,
                     pi / 2,
-                    0.4
+                    0.4,
                 )
             )
 
@@ -234,21 +254,15 @@ class Doggo_Heaven:
         """
         pygame.key.set_repeat(1, 10)
         while True:
-            clock.tick(FPS)
-            pygame.display.set_caption(f"Doggo Heaven - {int(clock.get_fps())} FPS")
+            self.clock.tick(FPS)
+            pygame.display.set_caption(
+                f"Doggo Heaven - {int(self.clock.get_fps())} FPS"
+            )
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     return
                 # Key Bindings
                 keys = pygame.key.get_pressed()
-                # Idle speed
-                if (
-                    not keys[pygame.K_w]
-                    and not keys[pygame.K_s]
-                    and not keys[pygame.K_a]
-                    and not keys[pygame.K_d]
-                ):
-                    player.speed = 0
 
                 # Movement
                 ## Up
@@ -291,6 +305,21 @@ class Doggo_Heaven:
                     elif FPS == MAX_FPS:
                         FPS = LOW_FPS
 
+                # Reset and Garbage collection
+                if keys[pygame.K_r]:
+                    # Sprites
+                    del tennis_ball_img
+                    del player_drop_left
+                    del player_drop_right
+                    del player_jump_left
+                    del player_jump_right
+                    del player_left
+                    del player_right
+                    # Models
+                    del player
+                    del background
+                    self._reset()
+
                 # Quit
                 if keys[pygame.K_q] or keys[pygame.K_ESCAPE]:
                     return
@@ -332,12 +361,13 @@ class Doggo_Heaven:
                     )
 
             # Draw the background and the background objects
-            window.blit(background, (0, 0))
-            self.background_group.draw(window)
-            self.tennis_ball_group.draw(window)
-            window.blit(player.image, player_rect)
+            self.window.blit(background, (0, 0))
+            self.background_group.draw(self.window)
+            self.tennis_ball_group.draw(self.window)
+            self.window.blit(player.image, player_rect)
             pygame.display.flip()
 
 
+pygame.init()
 Doggo_Heaven().main()
 pygame.quit()
