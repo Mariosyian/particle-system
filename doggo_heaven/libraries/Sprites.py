@@ -1,3 +1,9 @@
+"""
+Author: Marios Yiannakou
+
+Overrides the `pygame` modules `Sprite` class, to customise functionality for the
+'Doggo Heaven' game. Also adds the `Tennis_Ball` and `Player` sprites.
+"""
 import pygame
 
 from libraries import colors
@@ -44,6 +50,9 @@ class Sprite(pygame.sprite.Sprite):
     speed = None
     elasticity = None
 
+    # Hitbox format: top_left_x, top_left_y, width, height
+    hitbox = None
+
     def __init__(
         self,
         image=None,
@@ -71,9 +80,13 @@ class Sprite(pygame.sprite.Sprite):
         self.speed = speed
         self.elasticity = elasticity
 
+        self.hitbox = [x_coord - 5, y_coord - 5, width + 5, height + 5]
+
     def apply_gravity(self):
         """
         Applies a gravity vector to the object.
+
+        CREDITS: https://www.petercollingridge.co.uk/tutorials/pygame-physics-simulation/gravity/
         """
         (self.angle, self.speed) = add_vectors(
             self.angle, self.speed, GRAVITY_ANGLE, GRAVITY_MAGN
@@ -81,27 +94,6 @@ class Sprite(pygame.sprite.Sprite):
         self.rect.x += sin(self.angle) * self.speed
         self.rect.y -= cos(self.angle) * self.speed
         self.speed *= DRAG
-
-        return self.rect
-
-    def bounce(self):
-        if self.rect.x >= WINDOW_WIDTH:
-            self.rect.x = 2 * WINDOW_WIDTH - self.rect.x
-            self.angle = -self.angle
-            self.speed *= self.elasticity
-        elif self.rect.x <= 0:
-            self.rect.x -= 2 * self.rect.x
-            self.angle = -self.angle
-            self.speed *= self.elasticity
-
-        if self.rect.y >= WINDOW_HEIGHT - self.height:
-            self.rect.y = 2 * WINDOW_HEIGHT - (self.rect.y + self.height)
-            self.angle = pi - self.angle
-            self.speed *= self.elasticity
-        elif self.rect.y <= 0:
-            self.rect.y -= 2 * self.rect.y
-            self.angle = pi - self.angle
-            self.speed *= self.elasticity
 
         return self.rect
 
@@ -145,6 +137,27 @@ class Tennis_Ball(Sprite):
             image, width, height, x_coord, y_coord, angle, speed, elasticity
         )
 
+    def bounce(self):
+        if self.rect.x >= WINDOW_WIDTH:
+            self.rect.x = 2 * WINDOW_WIDTH - self.rect.x
+            self.angle = -self.angle
+            self.speed *= self.elasticity
+        elif self.rect.x <= 0:
+            self.rect.x -= 2 * self.rect.x
+            self.angle = -self.angle
+            self.speed *= self.elasticity
+
+        if self.rect.y >= (WINDOW_HEIGHT - self.height):
+            self.rect.y = 2 * WINDOW_HEIGHT - (self.rect.y + self.height)
+            self.angle = pi - self.angle
+            self.speed *= self.elasticity
+        elif self.rect.y <= 0:
+            self.rect.y -= 2 * self.rect.y
+            self.angle = pi - self.angle
+            self.speed *= self.elasticity
+
+        return self.rect
+
 
 class Player(Sprite):
     """
@@ -187,6 +200,7 @@ class Player(Sprite):
         self.speed = offset
         if self.rect.y > MAX_UP:
             self.rect.top -= offset
+            self.hitbox[1] -= offset
 
     def move_down(self, offset=5):
         """
@@ -198,6 +212,7 @@ class Player(Sprite):
         self.speed = offset
         if self.rect.y < (MAX_DOWN - self.rect.height):
             self.rect.bottom += offset
+            self.hitbox[1] += offset
 
     def move_right(self, offset=5):
         """
@@ -210,6 +225,7 @@ class Player(Sprite):
         self.direction = RIGHT
         if self.rect.x < (MAX_RIGHT - self.rect.width):
             self.rect.right += offset
+            self.hitbox[0] += offset
 
     def move_left(self, offset=5):
         """
@@ -222,3 +238,4 @@ class Player(Sprite):
         self.direction = LEFT
         if self.rect.x > MAX_LEFT:
             self.rect.left -= offset
+            self.hitbox[0] -= offset

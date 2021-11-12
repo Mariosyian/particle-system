@@ -2,6 +2,11 @@
 Author: Marios Yiannakou
 
 The main instance of the particle system.
+
+System used:
+- CPU: AMD Ryzen 7 5700U
+- GPU: AMD (Integrated) Radeon Graphics
+- RAM: 1 * 8GB DDR4 @ 3200MHz
 """
 # Remove the pygame welcome message ...
 from os import environ
@@ -15,6 +20,7 @@ from libraries import colors, vertices
 from libraries.globals import *
 from libraries.Sprites import *
 from math import pi
+from random import randint
 from time import time_ns
 
 
@@ -28,6 +34,7 @@ class Doggo_Heaven:
 
     clock = None
     window = None
+    sys_font = None
 
     def _initialise(self):
         """
@@ -36,7 +43,8 @@ class Doggo_Heaven:
         """
         self.clock = pygame.time.Clock()
         self.window = pygame.display.set_mode(SCREEN)
-        pygame.display.set_caption(f"Doggo Heaven - {int(self.clock.get_fps())} FPS")
+        self.sys_font = pygame.font.Font(pygame.font.get_default_font(), 10)
+        pygame.display.set_caption(f"Doggo Heaven")
         pygame.display.set_icon(pygame.image.load("assets/images/icon.ico").convert())
 
     def _create_background_objects(self):
@@ -45,106 +53,94 @@ class Doggo_Heaven:
         `background_objects` sprite group.
         """
         # cloud_1
-        cloud_1 = vertices.cloud_1
         self.background_group.add(
             Sprite(
                 None,
-                vertices.get_width(cloud_1),
-                vertices.get_height(cloud_1),
-                vertices.get_origin_x(cloud_1),
-                vertices.get_origin_y(cloud_1),
+                vertices.get_width(vertices.cloud_1),
+                vertices.get_height(vertices.cloud_1),
+                vertices.get_origin_x(vertices.cloud_1),
+                vertices.get_origin_y(vertices.cloud_1),
                 0,
                 0,
                 0,
-                vertices.get_color(cloud_1),
+                vertices.get_color(vertices.cloud_1),
             )
         )
-        del cloud_1
 
         # cloud_2
-        cloud_2 = vertices.cloud_2
         self.background_group.add(
             Sprite(
                 None,
-                vertices.get_width(cloud_2),
-                vertices.get_height(cloud_2),
-                vertices.get_origin_x(cloud_2),
-                vertices.get_origin_y(cloud_2),
+                vertices.get_width(vertices.cloud_2),
+                vertices.get_height(vertices.cloud_2),
+                vertices.get_origin_x(vertices.cloud_2),
+                vertices.get_origin_y(vertices.cloud_2),
                 0,
                 0,
                 0,
-                vertices.get_color(cloud_2),
+                vertices.get_color(vertices.cloud_2),
             )
         )
-        del cloud_2
 
         # cloud_2_1
-        cloud_2_1 = vertices.cloud_2_1
         self.background_group.add(
             Sprite(
                 None,
-                vertices.get_width(cloud_2_1),
-                vertices.get_height(cloud_2_1),
-                vertices.get_origin_x(cloud_2_1),
-                vertices.get_origin_y(cloud_2_1),
+                vertices.get_width(vertices.cloud_2_1),
+                vertices.get_height(vertices.cloud_2_1),
+                vertices.get_origin_x(vertices.cloud_2_1),
+                vertices.get_origin_y(vertices.cloud_2_1),
                 0,
                 0,
                 0,
-                vertices.get_color(cloud_2_1),
+                vertices.get_color(vertices.cloud_2_1),
             )
         )
-        del cloud_2_1
 
         # mountain_1
-        mountain_1 = vertices.mountain_1
         self.background_group.add(
             Sprite(
                 None,
-                vertices.get_width(mountain_1),
-                vertices.get_height(mountain_1),
-                vertices.get_origin_x(mountain_1),
-                vertices.get_origin_y(mountain_1),
+                vertices.get_width(vertices.mountain_1),
+                vertices.get_height(vertices.mountain_1),
+                vertices.get_origin_x(vertices.mountain_1),
+                vertices.get_origin_y(vertices.mountain_1),
                 0,
                 0,
                 0,
-                vertices.get_color(mountain_1),
+                vertices.get_color(vertices.mountain_1),
             )
         )
-        del mountain_1
 
         # mountain_1_1
-        mountain_1_1 = vertices.mountain_1_1
         self.background_group.add(
             Sprite(
                 None,
-                vertices.get_width(mountain_1_1),
-                vertices.get_height(mountain_1_1),
-                vertices.get_origin_x(mountain_1_1),
-                vertices.get_origin_y(mountain_1_1),
+                vertices.get_width(vertices.mountain_1_1),
+                vertices.get_height(vertices.mountain_1_1),
+                vertices.get_origin_x(vertices.mountain_1_1),
+                vertices.get_origin_y(vertices.mountain_1_1),
                 0,
                 0,
                 0,
-                vertices.get_color(mountain_1_1),
+                vertices.get_color(vertices.mountain_1_1),
             )
         )
-        del mountain_1_1
 
         # ground
-        ground = vertices.ground
         self.background_group.add(
             Sprite(
                 None,
-                vertices.get_width(ground),
-                vertices.get_height(ground),
-                vertices.get_origin_x(ground),
-                vertices.get_origin_y(ground),
+                vertices.get_width(vertices.ground),
+                vertices.get_height(vertices.ground),
+                vertices.get_origin_x(vertices.ground),
+                vertices.get_origin_y(vertices.ground),
                 0,
                 0,
                 0,
-                vertices.get_color(ground),
+                vertices.get_color(vertices.ground),
             )
         )
-        del ground
 
     def _reset(self):
         """Reset the program (Garbage collection)."""
@@ -164,7 +160,7 @@ class Doggo_Heaven:
         self.player_group.empty()
 
         collect(generation=2)
-        # TODO: Previous `main()` instance is still alive, hence the 0.1MB of RAM
+        # TODO: Previous `main()` instance is still alive, hence the slight RAM
         #       increase on `reset()`
         self.main()
 
@@ -172,6 +168,7 @@ class Doggo_Heaven:
         """Run the program."""
         self._initialise()
         FPS = GOLDEN_FPS
+        draw_hitboxes = False
 
         # Sprites
         ## Sky
@@ -194,7 +191,7 @@ class Doggo_Heaven:
                     tennis_ball_img.get_height(),
                     tennis_ball_img.get_width() + i * (WINDOW_WIDTH / NUM_OF_BALLS),
                     200,
-                    pi / 2,
+                    pi,
                     0.4,
                 )
             )
@@ -255,9 +252,9 @@ class Doggo_Heaven:
         pygame.key.set_repeat(1, 10)
         while True:
             self.clock.tick(FPS)
-            pygame.display.set_caption(
-                f"Doggo Heaven - {int(self.clock.get_fps())} FPS"
-            )
+            # Keep a track of all tennis ball sprites
+            tennis_balls = self.tennis_ball_group.sprites()
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     return
@@ -281,8 +278,8 @@ class Doggo_Heaven:
                     player.move_right()
                 ## Jump
                 if (
-                    keys[pygame.K_SPACE]
-                    and event.type == pygame.KEYDOWN
+                    event.type == pygame.KEYUP
+                    and event.key  == pygame.K_SPACE
                     and not player.is_jumping
                     and not player.is_dropping
                 ):
@@ -290,12 +287,9 @@ class Doggo_Heaven:
                     player.is_jumping = True
 
                 # Change video settings (Graphic settings)
-                # BUG: `pygame.key.set_repeat(1, 10)` causes this line to be executed
-                #      multiple times per click, hence it rotates too quickly and
-                #      causes unwanted results.
                 if (
-                    keys[pygame.K_g]
-                    and event.type == pygame.KEYDOWN
+                    event.type == pygame.KEYUP
+                    and event.key == pygame.K_g
                     and not (player.is_jumping or player.is_dropping)
                 ):
                     if FPS == LOW_FPS:
@@ -304,6 +298,13 @@ class Doggo_Heaven:
                         FPS = MAX_FPS
                     elif FPS == MAX_FPS:
                         FPS = LOW_FPS
+
+                # Toggle hitboxes
+                if (
+                    event.type == pygame.KEYUP
+                    and event.key == pygame.K_h
+                ):
+                    draw_hitboxes = not draw_hitboxes
 
                 # Reset and Garbage collection
                 if keys[pygame.K_r]:
@@ -320,6 +321,30 @@ class Doggo_Heaven:
                     del background
                     self._reset()
 
+                # Add tennis balls
+                if keys[pygame.K_PLUS] or keys[pygame.K_EQUALS]:
+                    self.tennis_ball_group.add(
+                        Tennis_Ball(
+                            tennis_ball_img,
+                            tennis_ball_img.get_width(),
+                            tennis_ball_img.get_height(),
+                            randint(tennis_ball_img.get_width(), WINDOW_WIDTH - tennis_ball_img.get_width()),
+                            randint(tennis_ball_img.get_height(), 200),
+                            pi,
+                            0.4,
+                        )
+                    )
+                
+                # Remove tennis balls
+                if keys[pygame.K_MINUS]:
+                    tennis_balls = self.tennis_ball_group.sprites()
+                    if len(tennis_balls) > 0:
+                        last_ball = tennis_balls[-1]
+                        self.tennis_ball_group.remove(
+                            last_ball
+                        )
+                        del last_ball
+
                 # Quit
                 if keys[pygame.K_q] or keys[pygame.K_ESCAPE]:
                     return
@@ -329,9 +354,13 @@ class Doggo_Heaven:
                 player.image = (
                     player_jump_left if player.direction == LEFT else player_jump_right
                 )
+                player.hitbox[2] = player.image.get_width() + 5
+                player.hitbox[3] = player.image.get_height() + 5
                 if (time_ns() - time_jump) <= jump_duration:
                     player_rect.y -= jump_offset[FPS]
+                    player.hitbox[1] -= jump_offset[FPS]
                 else:
+                    del time_jump
                     time_drop = time_ns()
                     player.is_jumping = False
                     player.is_dropping = True
@@ -339,32 +368,70 @@ class Doggo_Heaven:
                 player.image = (
                     player_drop_left if player.direction == LEFT else player_drop_right
                 )
+                player.hitbox[2] = player.image.get_width() + 5
+                player.hitbox[3] = player.image.get_height() + 5
                 if (time_ns() - time_drop) <= jump_duration:
                     player_rect.y += jump_offset[FPS]
+                    player.hitbox[1] += jump_offset[FPS]
                 else:
+                    del time_drop
                     player.is_dropping = False
                     player.is_jumping = False
             if not player.is_jumping and not player.is_dropping:
                 player.image = player_left if player.direction == LEFT else player_right
+                player.hitbox[2] = player.image.get_width() + 5
+                player.hitbox[3] = player.image.get_height() + 5
 
-            # Ball movement
-            for tennis_ball in self.tennis_ball_group.sprites():
+            # Tennis ball movement
+            for tennis_ball in tennis_balls:
+                # Gravity
                 tennis_ball.rect = tennis_ball.apply_gravity()
                 tennis_ball.rect = tennis_ball.bounce()
-
-            ## Collision logic
-            # Tennis ball with player
-            for tennis_ball in self.tennis_ball_group.sprites():
+                ## Collisions
+                # Tennis ball with player
                 if tennis_ball.rect.colliderect(player_rect):
                     (tennis_ball.angle, tennis_ball.speed) = add_vectors(
                         player.angle, player.speed, tennis_ball.angle, tennis_ball.speed
                     )
+                collided_tennis_ball = pygame.sprite.spritecollideany(
+                    tennis_ball, self.tennis_ball_group
+                )
+                # Tennis ball with tennis ball
+                if collided_tennis_ball and collided_tennis_ball != tennis_ball:
+                    (tennis_ball.angle, tennis_ball.speed) = add_vectors(
+                        tennis_ball.angle,
+                        (tennis_ball.speed * tennis_ball.elasticity),
+                        collided_tennis_ball.angle,
+                        (collided_tennis_ball.speed * collided_tennis_ball.elasticity),
+                    )
+                    # Explosion !!\*o*/!!
+                    collided_tennis_ball.angle = -tennis_ball.angle
 
-            # Draw the background and the background objects
+            # Draw the game
             self.window.blit(background, (0, 0))
             self.background_group.draw(self.window)
             self.tennis_ball_group.draw(self.window)
             self.window.blit(player.image, player_rect)
+            # Draw the HUD
+            self.window.blit(self.sys_font.render(f"FPS: {int(self.clock.get_fps())} - Switch between graphics settings with the 'g' key", True, colors.BLACK), (10, 5))
+            self.window.blit(self.sys_font.render(f"Tennis Balls: {len(tennis_balls)} - Change amount with the '+' and '-' keys", True, colors.BLACK), (10, 15))
+            # Draw the hitboxes
+            if draw_hitboxes:
+                pygame.draw.rect(self.window, colors.RED, player.hitbox, 2)
+                for tennis_ball in tennis_balls:
+                    pygame.draw.rect(
+                        self.window,
+                        colors.BLACK,
+                        (
+                            tennis_ball.rect.topleft[0] - 5,
+                            tennis_ball.rect.topleft[1] - 5,
+                            tennis_ball.width + 5,
+                            tennis_ball.height + 5,
+                        ),
+                        2
+                    )
+            
+            # Swap buffers
             pygame.display.flip()
 
 
