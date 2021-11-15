@@ -33,9 +33,6 @@ class Sprite(pygame.sprite.Sprite):
         math.pi down.
     :param speed: The initial speed (index as a float) of the surface. Accepts
         values between 0 and 1.
-    :param elasticity: The elasticity (index as a float) of the surface. This is a
-        multiplier index that is applied to the surface's speed each time it reaches a
-        boundary position.
     :param color: The color of the surface. This setting does nothing if an image has
         been provided.
     """
@@ -48,7 +45,6 @@ class Sprite(pygame.sprite.Sprite):
 
     angle = None
     speed = None
-    elasticity = None
 
     # Hitbox format: top_left_x, top_left_y, width, height
     hitbox = None
@@ -62,7 +58,6 @@ class Sprite(pygame.sprite.Sprite):
         y_coord=0,
         angle=0,
         speed=0,
-        elasticity=0.5,
         color=colors.WHITE,
     ):
         super().__init__()
@@ -78,18 +73,20 @@ class Sprite(pygame.sprite.Sprite):
         self.height = height
         self.angle = angle
         self.speed = speed
-        self.elasticity = elasticity
 
         self.hitbox = [x_coord - 5, y_coord - 5, width + 5, height + 5]
 
-    def apply_gravity(self):
+    def apply_gravity(self, gravity):
         """
-        Applies a gravity vector to the object.
-
+        Applies a gravity vector to the object. Need to pass the gravity magnitude as
+        this file does not read the updated value.
         CREDITS: https://www.petercollingridge.co.uk/tutorials/pygame-physics-simulation/gravity/
+
+        :param gravity: The magnitude of the gravity vector.
+        :returns: The updated rectangle of the sprite after gravity has been applied.
         """
         (self.angle, self.speed) = add_vectors(
-            self.angle, self.speed, GRAVITY_ANGLE, GRAVITY_MAGN
+            self.angle, self.speed, GRAVITY_ANGLE, gravity
         )
         self.rect.x += sin(self.angle) * self.speed
         self.rect.y -= cos(self.angle) * self.speed
@@ -122,6 +119,8 @@ class Tennis_Ball(Sprite):
         boundary position.
     """
 
+    elasticity = None
+
     def __init__(
         self,
         image=None,
@@ -134,8 +133,9 @@ class Tennis_Ball(Sprite):
         elasticity=0.8,
     ):
         super().__init__(
-            image, width, height, x_coord, y_coord, angle, speed, elasticity
+            image, width, height, x_coord, y_coord, angle, speed
         )
+        self.elasticity = elasticity
 
     def bounce(self):
         if self.rect.x >= WINDOW_WIDTH:
