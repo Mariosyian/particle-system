@@ -32,6 +32,7 @@ class Doggo_Heaven:
     player_group = pygame.sprite.Group()
     tennis_ball_group = pygame.sprite.Group()
 
+    # World variables
     clock = None
     window = None
     sys_font = None
@@ -96,6 +97,8 @@ class Doggo_Heaven:
                     200,
                     pi,
                     GRAVITY_MAGN,
+                    0.8,
+                    LIFETIME,
                 )
             )
 
@@ -229,6 +232,23 @@ class Doggo_Heaven:
                         background = pygame.image.load("assets/images/bg.jpg").convert()
                         self.font_color = colors.BLACK
 
+                ## Ball lifetime settings
+                # Decrease lifetime
+                if (
+                    event.type == pygame.KEYUP
+                    and pygame.key.get_mods() & pygame.KMOD_SHIFT
+                    and event.key == pygame.K_t
+                ):
+                    if LIFETIME > 0:
+                        LIFETIME -= 1
+                # Increase lifetime
+                if (
+                    event.type == pygame.KEYUP
+                    and pygame.key.get_mods() & pygame.KMOD_CTRL
+                    and event.key == pygame.K_t
+                ):
+                    LIFETIME += 1
+
                 # Toggle hitboxes
                 if (
                     event.type == pygame.KEYUP
@@ -262,6 +282,8 @@ class Doggo_Heaven:
                             randint(tennis_ball_img.get_height(), 200),
                             pi,
                             GRAVITY_MAGN,
+                            0.8,
+                            LIFETIME,
                         )
                     )
                 
@@ -286,6 +308,8 @@ class Doggo_Heaven:
                 )
                 player.hitbox[2] = player.image.get_width() + 5
                 player.hitbox[3] = player.image.get_height() + 5
+                player.direction = UP
+
                 # Stop the motion early if out of bounds
                 if player.rect.y <= 0:
                     time_drop = time_ns()
@@ -294,6 +318,7 @@ class Doggo_Heaven:
 
                 if (time_ns() - time_jump) <= (jump_duration / GRAVITY_MAGN):
                     jump_offset = jump_offset_dict[FPS]
+                    player.speed = jump_offset
                     player_rect.y -= jump_offset
                     player.hitbox[1] -= jump_offset
                 else:
@@ -307,6 +332,8 @@ class Doggo_Heaven:
                 )
                 player.hitbox[2] = player.image.get_width() + 5
                 player.hitbox[3] = player.image.get_height() + 5
+                player.direction = DOWN
+
                 # Stop the motion early if out of bounds
                 if player.rect.y >= (WINDOW_HEIGHT - player.rect.height):
                     player.is_dropping = False
@@ -314,12 +341,14 @@ class Doggo_Heaven:
 
                 if (time_ns() - time_drop) <= (jump_duration / GRAVITY_MAGN):
                     jump_offset =  jump_offset_dict[FPS]
+                    player.speed = jump_offset
                     player_rect.y += jump_offset
                     player.hitbox[1] += jump_offset
                 else:
                     del time_drop
                     player.is_dropping = False
                     player.is_jumping = False
+
             if not player.is_jumping and not player.is_dropping:
                 player.image = player_left if player.direction == LEFT else player_right
                 player.hitbox[2] = player.image.get_width() + 5
@@ -327,6 +356,10 @@ class Doggo_Heaven:
 
             # Tennis ball movement
             for tennis_ball in tennis_balls:
+                if not tennis_ball.alive():
+                    self.tennis_ball_group.remove(tennis_ball)
+                    del tennis_ball
+                    continue
                 # Gravity
                 tennis_ball.rect = tennis_ball.apply_gravity(GRAVITY_MAGN)
                 tennis_ball.rect = tennis_ball.bounce()
@@ -387,3 +420,4 @@ class Doggo_Heaven:
 pygame.init()
 Doggo_Heaven().main()
 pygame.quit()
+quit()
