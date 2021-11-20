@@ -35,6 +35,7 @@ class Doggo_Heaven:
     clock = None
     window = None
     sys_font = None
+    font_color = colors.BLACK
 
     def _initialise(self):
         """
@@ -43,7 +44,7 @@ class Doggo_Heaven:
         """
         self.clock = pygame.time.Clock()
         self.window = pygame.display.set_mode(SCREEN)
-        self.sys_font = pygame.font.Font(pygame.font.get_default_font(), 10)
+        self.sys_font = pygame.font.Font(pygame.font.get_default_font(), 14)
         pygame.display.set_caption(f"Doggo Heaven")
         pygame.display.set_icon(pygame.image.load("assets/images/icon.ico").convert())
 
@@ -172,12 +173,11 @@ class Doggo_Heaven:
         GRAVITY_MAGN = 1.0
 
         # Sprites
-        ## Sky
-        background = pygame.Surface(SCREEN).convert()
-        pygame.Surface.fill(background, colors.SKY)
-
-        ## Bakcground
-        self._create_background_objects()
+        ## Sky & background objects
+        # background = pygame.Surface(SCREEN).convert()
+        # pygame.Surface.fill(background, colors.SKY)
+        # self._create_background_objects()
+        background= pygame.image.load("assets/images/bg.jpg").convert()
 
         ## Tennis ball
         tennis_ball_img = pygame.image.load(
@@ -309,6 +309,10 @@ class Doggo_Heaven:
                 ):
                     if GRAVITY_MAGN > 0.1:
                         GRAVITY_MAGN = float("{:.1f}".format(GRAVITY_MAGN - 0.1))
+                    if GRAVITY_MAGN <= 0.6:
+                        del background
+                        background = pygame.image.load("assets/images/bg_space.jpg").convert()
+                        self.font_color = colors.WHITE
                 # Increase gravity
                 if (
                     event.type == pygame.KEYUP
@@ -317,6 +321,10 @@ class Doggo_Heaven:
                     and not (player.is_jumping or player.is_dropping)
                 ):
                     GRAVITY_MAGN = float("{:.1f}".format(GRAVITY_MAGN + 0.1))
+                    if GRAVITY_MAGN > 0.6:
+                        del background
+                        background = pygame.image.load("assets/images/bg.jpg").convert()
+                        self.font_color = colors.BLACK
 
                 # Toggle hitboxes
                 if (
@@ -438,16 +446,19 @@ class Doggo_Heaven:
                     )
                     # Explosion !!\*o*/!!
                     collided_tennis_ball.angle = -tennis_ball.angle
+                    collided_tennis_ball.speed *= collided_tennis_ball.elasticity
 
             # Draw the game
             self.window.blit(background, (0, 0))
-            self.background_group.draw(self.window)
+            # self.background_group.draw(self.window)
             self.tennis_ball_group.draw(self.window)
             self.window.blit(player.image, player_rect)
             # Draw the HUD
-            self.window.blit(self.sys_font.render(f"FPS: {int(self.clock.get_fps())} - Switch between FPS settings with the 'f' key", True, colors.BLACK), (10, 5))
-            self.window.blit(self.sys_font.render(f"Tennis Balls: {len(tennis_balls)} - Change amount with the '+' and '-' keys", True, colors.BLACK), (10, 15))
-            self.window.blit(self.sys_font.render(f"Gravity: {GRAVITY_MAGN} - Increase by pressing 'CTRL + g', or decrease by pressing the 'SHIFT + g' keys", True, colors.BLACK), (10, 25))
+            self.window.blit(self.sys_font.render(f"FPS: {int(self.clock.get_fps())} - Switch between FPS settings with the 'f' key", True, self.font_color), (10, 5))
+            self.window.blit(self.sys_font.render(f"Move: W, A, S, D -- Jump: Space", True, self.font_color), (10, 20))
+            self.window.blit(self.sys_font.render(f"Tennis Balls: {len(tennis_balls)} - Add/Remove balls with the '+' and '-' keys", True, self.font_color), (10, 35))
+            self.window.blit(self.sys_font.render(f"Gravity: {GRAVITY_MAGN} - Increase by pressing 'CTRL + g', or decrease by pressing the 'SHIFT + g' keys", True, self.font_color), (10, 50))
+            self.window.blit(self.sys_font.render(f"Toggle hitboxes with the 'h' key", True, self.font_color), (10, 65))
             # Draw the hitboxes
             if draw_hitboxes:
                 pygame.draw.rect(self.window, colors.RED, player.hitbox, 2)
