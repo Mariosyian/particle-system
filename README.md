@@ -8,7 +8,7 @@ This README file will be updated along the way with illustrations, 3D mockups an
 
 Paper illustration: ![doggo_heaven_paper](./assets/images/README/paper_illustration.jpg)
 2D PyOpenGL illustration (before addition of `pygame`): ![doggo_heaven_2d](./assets/images/README/2d_illustration.jpg)
-2D PyGame illustration: ![doggo_heaven_2d_pygame](./assets/images/README/2d_illustration_pygame.jpg)
+2D PyGame illustration (with `pygame` alone -- updated): ![doggo_heaven_2d_pygame](./assets/images/README/2d_illustration_pygame.jpg)
 
 # Requirements
 

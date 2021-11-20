@@ -7,7 +7,6 @@ Overrides the `pygame` modules `Sprite` class, to customise functionality for th
 import pygame
 
 from libraries import colors
-
 from libraries.globals import *
 from math import cos, sin
 

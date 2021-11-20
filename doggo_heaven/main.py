@@ -16,7 +16,7 @@ environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 from gc import collect
 import pygame
 
-from libraries import colors, vertices
+from libraries import colors
 from libraries.globals import *
 from libraries.Sprites import *
 from math import pi
@@ -35,6 +35,7 @@ class Doggo_Heaven:
     clock = None
     window = None
     sys_font = None
+    font_color = colors.BLACK
 
     def _initialise(self):
         """
@@ -43,104 +44,9 @@ class Doggo_Heaven:
         """
         self.clock = pygame.time.Clock()
         self.window = pygame.display.set_mode(SCREEN)
-        self.sys_font = pygame.font.Font(pygame.font.get_default_font(), 10)
+        self.sys_font = pygame.font.Font(pygame.font.get_default_font(), 14)
         pygame.display.set_caption(f"Doggo Heaven")
         pygame.display.set_icon(pygame.image.load("assets/images/icon.ico").convert())
-
-    def _create_background_objects(self):
-        """
-        Creates all background objects as sprites and adds them to the
-        `background_objects` sprite group.
-        """
-        # cloud_1
-        self.background_group.add(
-            Sprite(
-                None,
-                vertices.get_width(vertices.cloud_1),
-                vertices.get_height(vertices.cloud_1),
-                vertices.get_origin_x(vertices.cloud_1),
-                vertices.get_origin_y(vertices.cloud_1),
-                0,
-                0,
-                0,
-                vertices.get_color(vertices.cloud_1),
-            )
-        )
-
-        # cloud_2
-        self.background_group.add(
-            Sprite(
-                None,
-                vertices.get_width(vertices.cloud_2),
-                vertices.get_height(vertices.cloud_2),
-                vertices.get_origin_x(vertices.cloud_2),
-                vertices.get_origin_y(vertices.cloud_2),
-                0,
-                0,
-                0,
-                vertices.get_color(vertices.cloud_2),
-            )
-        )
-
-        # cloud_2_1
-        self.background_group.add(
-            Sprite(
-                None,
-                vertices.get_width(vertices.cloud_2_1),
-                vertices.get_height(vertices.cloud_2_1),
-                vertices.get_origin_x(vertices.cloud_2_1),
-                vertices.get_origin_y(vertices.cloud_2_1),
-                0,
-                0,
-                0,
-                vertices.get_color(vertices.cloud_2_1),
-            )
-        )
-
-        # mountain_1
-        self.background_group.add(
-            Sprite(
-                None,
-                vertices.get_width(vertices.mountain_1),
-                vertices.get_height(vertices.mountain_1),
-                vertices.get_origin_x(vertices.mountain_1),
-                vertices.get_origin_y(vertices.mountain_1),
-                0,
-                0,
-                0,
-                vertices.get_color(vertices.mountain_1),
-            )
-        )
-
-        # mountain_1_1
-        self.background_group.add(
-            Sprite(
-                None,
-                vertices.get_width(vertices.mountain_1_1),
-                vertices.get_height(vertices.mountain_1_1),
-                vertices.get_origin_x(vertices.mountain_1_1),
-                vertices.get_origin_y(vertices.mountain_1_1),
-                0,
-                0,
-                0,
-                vertices.get_color(vertices.mountain_1_1),
-            )
-        )
-
-        # ground
-        self.background_group.add(
-            Sprite(
-                None,
-                vertices.get_width(vertices.ground),
-                vertices.get_height(vertices.ground),
-                vertices.get_origin_x(vertices.ground),
-                vertices.get_origin_y(vertices.ground),
-                0,
-                0,
-                0,
-                vertices.get_color(vertices.ground),
-            )
-        )
 
     def _reset(self):
         """Reset the program (Garbage collection)."""
@@ -170,14 +76,11 @@ class Doggo_Heaven:
         # Reset here as the import is done after rendering, hence an `UnboundLocalError`
         # is raised.
         GRAVITY_MAGN = 1.0
+        LIFETIME = 0
 
         # Sprites
-        ## Sky
-        background = pygame.Surface(SCREEN).convert()
-        pygame.Surface.fill(background, colors.SKY)
-
-        ## Bakcground
-        self._create_background_objects()
+        ## Background
+        background= pygame.image.load("assets/images/bg.jpg").convert()
 
         ## Tennis ball
         tennis_ball_img = pygame.image.load(
@@ -309,6 +212,10 @@ class Doggo_Heaven:
                 ):
                     if GRAVITY_MAGN > 0.1:
                         GRAVITY_MAGN = float("{:.1f}".format(GRAVITY_MAGN - 0.1))
+                    if GRAVITY_MAGN <= 0.6:
+                        del background
+                        background = pygame.image.load("assets/images/bg_space.jpg").convert()
+                        self.font_color = colors.WHITE
                 # Increase gravity
                 if (
                     event.type == pygame.KEYUP
@@ -317,6 +224,10 @@ class Doggo_Heaven:
                     and not (player.is_jumping or player.is_dropping)
                 ):
                     GRAVITY_MAGN = float("{:.1f}".format(GRAVITY_MAGN + 0.1))
+                    if GRAVITY_MAGN > 0.6:
+                        del background
+                        background = pygame.image.load("assets/images/bg.jpg").convert()
+                        self.font_color = colors.BLACK
 
                 # Toggle hitboxes
                 if (
@@ -438,16 +349,21 @@ class Doggo_Heaven:
                     )
                     # Explosion !!\*o*/!!
                     collided_tennis_ball.angle = -tennis_ball.angle
+                    collided_tennis_ball.speed *= collided_tennis_ball.elasticity
 
             # Draw the game
             self.window.blit(background, (0, 0))
-            self.background_group.draw(self.window)
+            # self.background_group.draw(self.window)
             self.tennis_ball_group.draw(self.window)
             self.window.blit(player.image, player_rect)
             # Draw the HUD
-            self.window.blit(self.sys_font.render(f"FPS: {int(self.clock.get_fps())} - Switch between FPS settings with the 'f' key", True, colors.BLACK), (10, 5))
-            self.window.blit(self.sys_font.render(f"Tennis Balls: {len(tennis_balls)} - Change amount with the '+' and '-' keys", True, colors.BLACK), (10, 15))
-            self.window.blit(self.sys_font.render(f"Gravity: {GRAVITY_MAGN} - Increase by pressing 'CTRL + g', or decrease by pressing the 'SHIFT + g' keys", True, colors.BLACK), (10, 25))
+            self.window.blit(self.sys_font.render(f"FPS: {int(self.clock.get_fps())} - Switch between FPS settings with the 'f' key", True, self.font_color), (10, 5))
+            self.window.blit(self.sys_font.render(f"Move: W, A, S, D -- Jump: Space", True, self.font_color), (10, 20))
+            self.window.blit(self.sys_font.render(f"Tennis Balls: {len(tennis_balls)} - Add/Remove balls with the '+' and '-' keys", True, self.font_color), (10, 35))
+            self.window.blit(self.sys_font.render(f"Gravity: {GRAVITY_MAGN} - Increase by pressing 'CTRL + g', or decrease by pressing the 'SHIFT + g' keys", True, self.font_color), (10, 50))
+            self.window.blit(self.sys_font.render(f"Lifetime: {LIFETIME}s - Increase by pressing 'CTRL + t', or decrease by pressing the 'SHIFT + t' keys", True, self.font_color), (10, 65))
+            self.window.blit(self.sys_font.render(f"Does not affect currently rendered balls. Set to 0 for infinite lifetime.", True, self.font_color), (105, 80))
+            self.window.blit(self.sys_font.render(f"Toggle hitboxes with the 'h' key", True, self.font_color), (10, 95))
             # Draw the hitboxes
             if draw_hitboxes:
                 pygame.draw.rect(self.window, colors.RED, player.hitbox, 2)
