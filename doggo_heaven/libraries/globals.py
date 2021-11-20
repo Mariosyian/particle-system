@@ -34,6 +34,8 @@ DRAG = 0.99         # Multiplier for drag. Drag applied = 1 - `DRAG`
 # Ball lifetime
 LIFETIME = 0
 
+DEG_TO_RAD = 0.017453293
+
 def add_vectors(angle_1, magn_1, angle_2, magn_2):
     """
     Adds two vectors, each with the given angle and magnitude, and returns the
