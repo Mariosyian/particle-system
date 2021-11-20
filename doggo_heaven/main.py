@@ -32,6 +32,7 @@ class Doggo_Heaven:
     player_group = pygame.sprite.Group()
     tennis_ball_group = pygame.sprite.Group()
 
+    # World variables
     clock = None
     window = None
     sys_font = None
@@ -47,101 +48,6 @@ class Doggo_Heaven:
         self.sys_font = pygame.font.Font(pygame.font.get_default_font(), 14)
         pygame.display.set_caption(f"Doggo Heaven")
         pygame.display.set_icon(pygame.image.load("assets/images/icon.ico").convert())
-
-    def _create_background_objects(self):
-        """
-        Creates all background objects as sprites and adds them to the
-        `background_objects` sprite group.
-        """
-        # cloud_1
-        self.background_group.add(
-            Sprite(
-                None,
-                vertices.get_width(vertices.cloud_1),
-                vertices.get_height(vertices.cloud_1),
-                vertices.get_origin_x(vertices.cloud_1),
-                vertices.get_origin_y(vertices.cloud_1),
-                0,
-                0,
-                0,
-                vertices.get_color(vertices.cloud_1),
-            )
-        )
-
-        # cloud_2
-        self.background_group.add(
-            Sprite(
-                None,
-                vertices.get_width(vertices.cloud_2),
-                vertices.get_height(vertices.cloud_2),
-                vertices.get_origin_x(vertices.cloud_2),
-                vertices.get_origin_y(vertices.cloud_2),
-                0,
-                0,
-                0,
-                vertices.get_color(vertices.cloud_2),
-            )
-        )
-
-        # cloud_2_1
-        self.background_group.add(
-            Sprite(
-                None,
-                vertices.get_width(vertices.cloud_2_1),
-                vertices.get_height(vertices.cloud_2_1),
-                vertices.get_origin_x(vertices.cloud_2_1),
-                vertices.get_origin_y(vertices.cloud_2_1),
-                0,
-                0,
-                0,
-                vertices.get_color(vertices.cloud_2_1),
-            )
-        )
-
-        # mountain_1
-        self.background_group.add(
-            Sprite(
-                None,
-                vertices.get_width(vertices.mountain_1),
-                vertices.get_height(vertices.mountain_1),
-                vertices.get_origin_x(vertices.mountain_1),
-                vertices.get_origin_y(vertices.mountain_1),
-                0,
-                0,
-                0,
-                vertices.get_color(vertices.mountain_1),
-            )
-        )
-
-        # mountain_1_1
-        self.background_group.add(
-            Sprite(
-                None,
-                vertices.get_width(vertices.mountain_1_1),
-                vertices.get_height(vertices.mountain_1_1),
-                vertices.get_origin_x(vertices.mountain_1_1),
-                vertices.get_origin_y(vertices.mountain_1_1),
-                0,
-                0,
-                0,
-                vertices.get_color(vertices.mountain_1_1),
-            )
-        )
-
-        # ground
-        self.background_group.add(
-            Sprite(
-                None,
-                vertices.get_width(vertices.ground),
-                vertices.get_height(vertices.ground),
-                vertices.get_origin_x(vertices.ground),
-                vertices.get_origin_y(vertices.ground),
-                0,
-                0,
-                0,
-                vertices.get_color(vertices.ground),
-            )
-        )
 
     def _reset(self):
         """Reset the program (Garbage collection)."""
@@ -171,12 +77,10 @@ class Doggo_Heaven:
         # Reset here as the import is done after rendering, hence an `UnboundLocalError`
         # is raised.
         GRAVITY_MAGN = 1.0
+        LIFETIME = 0
 
         # Sprites
-        ## Sky & background objects
-        # background = pygame.Surface(SCREEN).convert()
-        # pygame.Surface.fill(background, colors.SKY)
-        # self._create_background_objects()
+        ## Background
         background= pygame.image.load("assets/images/bg.jpg").convert()
 
         ## Tennis ball
@@ -193,6 +97,8 @@ class Doggo_Heaven:
                     200,
                     pi,
                     GRAVITY_MAGN,
+                    0.8,
+                    LIFETIME,
                 )
             )
 
@@ -326,6 +232,23 @@ class Doggo_Heaven:
                         background = pygame.image.load("assets/images/bg.jpg").convert()
                         self.font_color = colors.BLACK
 
+                ## Ball lifetime settings
+                # Decrease lifetime
+                if (
+                    event.type == pygame.KEYUP
+                    and pygame.key.get_mods() & pygame.KMOD_SHIFT
+                    and event.key == pygame.K_t
+                ):
+                    if LIFETIME > 0:
+                        LIFETIME -= 1
+                # Increase lifetime
+                if (
+                    event.type == pygame.KEYUP
+                    and pygame.key.get_mods() & pygame.KMOD_CTRL
+                    and event.key == pygame.K_t
+                ):
+                    LIFETIME += 1
+
                 # Toggle hitboxes
                 if (
                     event.type == pygame.KEYUP
@@ -359,6 +282,8 @@ class Doggo_Heaven:
                             randint(tennis_ball_img.get_height(), 200),
                             pi,
                             GRAVITY_MAGN,
+                            0.8,
+                            LIFETIME,
                         )
                     )
                 
@@ -383,6 +308,8 @@ class Doggo_Heaven:
                 )
                 player.hitbox[2] = player.image.get_width() + 5
                 player.hitbox[3] = player.image.get_height() + 5
+                player.direction = UP
+
                 # Stop the motion early if out of bounds
                 if player.rect.y <= 0:
                     time_drop = time_ns()
@@ -391,6 +318,7 @@ class Doggo_Heaven:
 
                 if (time_ns() - time_jump) <= (jump_duration / GRAVITY_MAGN):
                     jump_offset = jump_offset_dict[FPS]
+                    player.speed = jump_offset
                     player_rect.y -= jump_offset
                     player.hitbox[1] -= jump_offset
                 else:
@@ -404,6 +332,8 @@ class Doggo_Heaven:
                 )
                 player.hitbox[2] = player.image.get_width() + 5
                 player.hitbox[3] = player.image.get_height() + 5
+                player.direction = DOWN
+
                 # Stop the motion early if out of bounds
                 if player.rect.y >= (WINDOW_HEIGHT - player.rect.height):
                     player.is_dropping = False
@@ -411,12 +341,14 @@ class Doggo_Heaven:
 
                 if (time_ns() - time_drop) <= (jump_duration / GRAVITY_MAGN):
                     jump_offset =  jump_offset_dict[FPS]
+                    player.speed = jump_offset
                     player_rect.y += jump_offset
                     player.hitbox[1] += jump_offset
                 else:
                     del time_drop
                     player.is_dropping = False
                     player.is_jumping = False
+
             if not player.is_jumping and not player.is_dropping:
                 player.image = player_left if player.direction == LEFT else player_right
                 player.hitbox[2] = player.image.get_width() + 5
@@ -424,6 +356,10 @@ class Doggo_Heaven:
 
             # Tennis ball movement
             for tennis_ball in tennis_balls:
+                if not tennis_ball.alive():
+                    self.tennis_ball_group.remove(tennis_ball)
+                    del tennis_ball
+                    continue
                 # Gravity
                 tennis_ball.rect = tennis_ball.apply_gravity(GRAVITY_MAGN)
                 tennis_ball.rect = tennis_ball.bounce()
@@ -458,7 +394,9 @@ class Doggo_Heaven:
             self.window.blit(self.sys_font.render(f"Move: W, A, S, D -- Jump: Space", True, self.font_color), (10, 20))
             self.window.blit(self.sys_font.render(f"Tennis Balls: {len(tennis_balls)} - Add/Remove balls with the '+' and '-' keys", True, self.font_color), (10, 35))
             self.window.blit(self.sys_font.render(f"Gravity: {GRAVITY_MAGN} - Increase by pressing 'CTRL + g', or decrease by pressing the 'SHIFT + g' keys", True, self.font_color), (10, 50))
-            self.window.blit(self.sys_font.render(f"Toggle hitboxes with the 'h' key", True, self.font_color), (10, 65))
+            self.window.blit(self.sys_font.render(f"Lifetime: {LIFETIME}s - Increase by pressing 'CTRL + t', or decrease by pressing the 'SHIFT + t' keys (Does not affect currently rendered balls)", True, self.font_color), (10, 65))
+            self.window.blit(self.sys_font.render(f"Does not affect currently rendered balls. Set to 0 for infinite lifetime.", True, self.font_color), (105, 80))
+            self.window.blit(self.sys_font.render(f"Toggle hitboxes with the 'h' key", True, self.font_color), (10, 95))
             # Draw the hitboxes
             if draw_hitboxes:
                 pygame.draw.rect(self.window, colors.RED, player.hitbox, 2)
@@ -482,3 +420,4 @@ class Doggo_Heaven:
 pygame.init()
 Doggo_Heaven().main()
 pygame.quit()
+quit()

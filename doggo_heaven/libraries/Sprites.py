@@ -10,6 +10,7 @@ from libraries import colors
 
 from libraries.globals import *
 from math import cos, sin
+from time import time_ns
 
 
 class Sprite(pygame.sprite.Sprite):
@@ -103,6 +104,7 @@ class Tennis_Ball(Sprite):
         - Gravity properties
             - Elasticity
         - Collision capabilities with other particles (excluding background)
+        - Lifetime
 
     :param image: An image loaded using `pygame.image.load`, or `None` if drawing a
         simple, filled rectangle. This is effectively the sprites surface.
@@ -117,9 +119,17 @@ class Tennis_Ball(Sprite):
     :param elasticity: The elasticity (index as a float) of the tennis ball. This is a
         multiplier index that is applied to the ball's speed each time it reaches a
         boundary position.
+    :param opacity: The opacity (alpha value) of the image. This is an integer in the
+        range 0 - 255 (inclusive), where 0 is fully transparent and 255 is fully
+        opaque.
+    :param lifetime: The amount of time (in seconds) the ball remains in the game.
+        An integer greater than zero. If zero, the ball does not disappear
+        (i.e. infinite liftime).
     """
 
     elasticity = None
+    born = None
+    lifetime = 0
 
     def __init__(
         self,
@@ -131,11 +141,14 @@ class Tennis_Ball(Sprite):
         angle=0,
         speed=GRAVITY_MAGN,
         elasticity=0.8,
+        lifetime=0,
     ):
         super().__init__(
             image, width, height, x_coord, y_coord, angle, speed
         )
-        self.elasticity = elasticity
+        self.elasticity = float(elasticity)
+        self.lifetime = lifetime
+        self.born = time_ns()
 
     def bounce(self):
         if self.rect.x >= WINDOW_WIDTH:
@@ -158,6 +171,13 @@ class Tennis_Ball(Sprite):
 
         return self.rect
 
+    def alive(self):
+        if self.lifetime == 0:
+            return True
+
+        while time_ns() - self.born < (self.lifetime * 1000 * 1000 * 1000):
+            return True
+        return False
 
 class Player(Sprite):
     """

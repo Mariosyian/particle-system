@@ -1,5 +1,6 @@
 glfw==2.3.0
 PyOpenGL==3.1.5
+PyOpenGL-accelerate==3.1.5
 pyrr==0.10.3
 pillow==8.4.0
 pygame==2.0.0
