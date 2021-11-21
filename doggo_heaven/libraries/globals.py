@@ -29,10 +29,11 @@ MAX_RIGHT = 1280
 # Gravity
 GRAVITY_ANGLE = pi  # Gravity angle in radians
 GRAVITY_MAGN = 1.0  # Gravity magnitude
-DRAG = 0.99         # Multiplier for drag. Drag applied = 1 - `DRAG`
+DRAG = 0.99  # Multiplier for drag. Drag applied = 1 - `DRAG`
 
 # Tennis ball lifetime in seconds
 LIFETIME = 0
+
 
 def add_vectors(angle_1, magn_1, angle_2, magn_2):
     """

@@ -81,7 +81,7 @@ class Doggo_Heaven:
 
         # Sprites
         ## Background
-        background= pygame.image.load("assets/images/bg.jpg").convert()
+        background = pygame.image.load("assets/images/bg.jpg").convert()
 
         ## Tennis ball
         tennis_ball_img = pygame.image.load(
@@ -185,7 +185,7 @@ class Doggo_Heaven:
                 ## Jump
                 if (
                     event.type == pygame.KEYUP
-                    and event.key  == pygame.K_SPACE
+                    and event.key == pygame.K_SPACE
                     and not player.is_jumping
                     and not player.is_dropping
                 ):
@@ -217,7 +217,9 @@ class Doggo_Heaven:
                         GRAVITY_MAGN = float("{:.1f}".format(GRAVITY_MAGN - 0.1))
                     if GRAVITY_MAGN <= 0.6:
                         del background
-                        background = pygame.image.load("assets/images/bg_space.jpg").convert()
+                        background = pygame.image.load(
+                            "assets/images/bg_space.jpg"
+                        ).convert()
                         self.font_color = colors.WHITE
                 # Increase gravity
                 if (
@@ -250,10 +252,7 @@ class Doggo_Heaven:
                     LIFETIME += 1
 
                 # Toggle hitboxes
-                if (
-                    event.type == pygame.KEYUP
-                    and event.key == pygame.K_h
-                ):
+                if event.type == pygame.KEYUP and event.key == pygame.K_h:
                     draw_hitboxes = not draw_hitboxes
 
                 # Reset and Garbage collection
@@ -278,7 +277,10 @@ class Doggo_Heaven:
                             tennis_ball_img,
                             tennis_ball_img.get_width(),
                             tennis_ball_img.get_height(),
-                            randint(tennis_ball_img.get_width(), WINDOW_WIDTH - tennis_ball_img.get_width()),
+                            randint(
+                                tennis_ball_img.get_width(),
+                                WINDOW_WIDTH - tennis_ball_img.get_width(),
+                            ),
                             randint(tennis_ball_img.get_height(), 200),
                             pi,
                             GRAVITY_MAGN,
@@ -286,15 +288,13 @@ class Doggo_Heaven:
                             LIFETIME,
                         )
                     )
-                
+
                 # Remove tennis balls
                 if keys[pygame.K_MINUS]:
                     tennis_balls = self.tennis_ball_group.sprites()
                     if len(tennis_balls) > 0:
                         last_ball = tennis_balls[-1]
-                        self.tennis_ball_group.remove(
-                            last_ball
-                        )
+                        self.tennis_ball_group.remove(last_ball)
                         del last_ball
 
                 # Quit
@@ -306,8 +306,7 @@ class Doggo_Heaven:
                 player.image = (
                     player_jump_left if player.direction == LEFT else player_jump_right
                 )
-                player.hitbox[2] = player.image.get_width() + 5
-                player.hitbox[3] = player.image.get_height() + 5
+                player.update_width_height()
                 player.direction = UP
 
                 # Stop the motion early if out of bounds
@@ -330,8 +329,7 @@ class Doggo_Heaven:
                 player.image = (
                     player_drop_left if player.direction == LEFT else player_drop_right
                 )
-                player.hitbox[2] = player.image.get_width() + 5
-                player.hitbox[3] = player.image.get_height() + 5
+                player.update_width_height()
                 player.direction = DOWN
 
                 # Stop the motion early if out of bounds
@@ -340,7 +338,7 @@ class Doggo_Heaven:
                     player.is_jumping = False
 
                 if (time_ns() - time_drop) <= (jump_duration / GRAVITY_MAGN):
-                    jump_offset =  jump_offset_dict[FPS]
+                    jump_offset = jump_offset_dict[FPS]
                     player.speed = jump_offset
                     player_rect.y += jump_offset
                     player.hitbox[1] += jump_offset
@@ -351,8 +349,7 @@ class Doggo_Heaven:
 
             if not player.is_jumping and not player.is_dropping:
                 player.image = player_left if player.direction == LEFT else player_right
-                player.hitbox[2] = player.image.get_width() + 5
-                player.hitbox[3] = player.image.get_height() + 5
+                player.update_width_height()
 
             # Tennis ball movement
             for tennis_ball in tennis_balls:
@@ -390,13 +387,58 @@ class Doggo_Heaven:
             self.tennis_ball_group.draw(self.window)
             self.window.blit(player.image, player_rect)
             # Draw the HUD
-            self.window.blit(self.sys_font.render(f"FPS: {int(self.clock.get_fps())} - Switch between FPS settings with the 'f' key", True, self.font_color), (10, 5))
-            self.window.blit(self.sys_font.render(f"Move: W, A, S, D -- Jump: Space", True, self.font_color), (10, 20))
-            self.window.blit(self.sys_font.render(f"Tennis Balls: {len(tennis_balls)} - Add/Remove balls with the '+' and '-' keys", True, self.font_color), (10, 35))
-            self.window.blit(self.sys_font.render(f"Gravity: {GRAVITY_MAGN} - Increase by pressing 'CTRL + g', or decrease by pressing the 'SHIFT + g' keys", True, self.font_color), (10, 50))
-            self.window.blit(self.sys_font.render(f"Lifetime: {LIFETIME}s - Increase by pressing 'CTRL + t', or decrease by pressing the 'SHIFT + t' keys", True, self.font_color), (10, 65))
-            self.window.blit(self.sys_font.render(f"Does not affect currently rendered balls. Set to 0 for infinite lifetime.", True, self.font_color), (105, 80))
-            self.window.blit(self.sys_font.render(f"Toggle hitboxes with the 'h' key", True, self.font_color), (10, 95))
+            self.window.blit(
+                self.sys_font.render(
+                    f"FPS: {int(self.clock.get_fps())} - Switch between FPS settings with the 'f' key",
+                    True,
+                    self.font_color,
+                ),
+                (10, 5),
+            )
+            self.window.blit(
+                self.sys_font.render(
+                    f"Move: W, A, S, D -- Jump: Space", True, self.font_color
+                ),
+                (10, 20),
+            )
+            self.window.blit(
+                self.sys_font.render(
+                    f"Tennis Balls: {len(tennis_balls)} - Add/Remove balls with the '+' and '-' keys",
+                    True,
+                    self.font_color,
+                ),
+                (10, 35),
+            )
+            self.window.blit(
+                self.sys_font.render(
+                    f"Gravity: {GRAVITY_MAGN} - Increase by pressing 'CTRL + g', or decrease by pressing the 'SHIFT + g' keys",
+                    True,
+                    self.font_color,
+                ),
+                (10, 50),
+            )
+            self.window.blit(
+                self.sys_font.render(
+                    f"Lifetime: {LIFETIME}s - Increase by pressing 'CTRL + t', or decrease by pressing the 'SHIFT + t' keys",
+                    True,
+                    self.font_color,
+                ),
+                (10, 65),
+            )
+            self.window.blit(
+                self.sys_font.render(
+                    f"Does not affect currently rendered balls. Set to 0 for infinite lifetime.",
+                    True,
+                    self.font_color,
+                ),
+                (105, 80),
+            )
+            self.window.blit(
+                self.sys_font.render(
+                    f"Toggle hitboxes with the 'h' key", True, self.font_color
+                ),
+                (10, 95),
+            )
             # Draw the hitboxes
             if draw_hitboxes:
                 pygame.draw.rect(self.window, colors.RED, player.hitbox, 2)
@@ -410,7 +452,7 @@ class Doggo_Heaven:
                             tennis_ball.width + 5,
                             tennis_ball.height + 5,
                         ),
-                        2
+                        2,
                     )
 
             # Swap buffers

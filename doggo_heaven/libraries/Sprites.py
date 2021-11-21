@@ -142,14 +142,17 @@ class Tennis_Ball(Sprite):
         elasticity=0.8,
         lifetime=0,
     ):
-        super().__init__(
-            image, width, height, x_coord, y_coord, angle, speed
-        )
+        super().__init__(image, width, height, x_coord, y_coord, angle, speed)
         self.elasticity = float(elasticity)
         self.lifetime = lifetime
         self.born = time_ns()
 
     def bounce(self):
+        """
+        Handle the bouncing logic in case a tennis ball collides with any screen edges.
+
+        :returns: The updated rectangle of the tennis ball.
+        """
         if self.rect.x >= WINDOW_WIDTH:
             self.rect.x = 2 * WINDOW_WIDTH - self.rect.x
             self.angle = -self.angle
@@ -171,12 +174,20 @@ class Tennis_Ball(Sprite):
         return self.rect
 
     def alive(self):
+        """
+        Calculates if a tennis ball sprite should be rendered or not.
+
+        :returns: True if `lifetime` is set to 0, or if `lifetime` is less than the
+            difference between the creation of the sprite and the current time in ns.
+            False otherwise.
+        """
         if self.lifetime == 0:
             return True
 
         while time_ns() - self.born < (self.lifetime * 1000 * 1000 * 1000):
             return True
         return False
+
 
 class Player(Sprite):
     """
@@ -204,7 +215,15 @@ class Player(Sprite):
     direction = None
 
     def __init__(
-        self, image=None, width=0, height=0, x_coord=0, y_coord=0, angle=-(pi/2), speed=0, direction=LEFT
+        self,
+        image=None,
+        width=0,
+        height=0,
+        x_coord=0,
+        y_coord=0,
+        angle=-(pi / 2),
+        speed=0,
+        direction=LEFT,
     ):
         super().__init__(image, width, height, x_coord, y_coord, angle, speed)
         self.direction = direction
@@ -252,9 +271,20 @@ class Player(Sprite):
 
         :param offset: The amount to translate the player by.
         """
-        self.angle = - (pi / 2)
+        self.angle = -(pi / 2)
         self.speed = offset
         self.direction = LEFT
         if self.rect.x > MAX_LEFT:
             self.rect.left -= offset
             self.hitbox[0] -= offset
+
+    def update_width_height(self):
+        """
+        Updates the players hitbox dimensions.
+
+        Use this right after updating the players sprite to ensure accurate collisions.
+        """
+        self.width = self.image.get_get_width()
+        self.height = self.image.get_get_height()
+        self.hitbox[2] = self.width + 5
+        self.hitbox[3] = self.height + 5

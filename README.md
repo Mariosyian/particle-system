@@ -20,6 +20,10 @@ The project was done using Python 3.8.6 (this is due to 3.8.6 being the default 
 $ pip install -r requirements_dev.txt
 ```
 
-**NOTE:** I'm currently using my Windows environment to run the particle system, as there seem to be a Linux library issue requesting I run the script using `sudo`. This note will be deleted or updated once a fix has been found.
+# Usage
 
-[This](https://www.youtube.com/playlist?list=PL1P11yPQAo7opIg8r-4BMfh1Z_dCOfI0y) is a good introductory starting tutorial, in my opinion, for PyOpenGL, although lengthy it teaches the basics of how to use PyOpenGL and all showcases the documentation.
+```
+# Navigate to the root directory of this repository.
+# Activate python virtual environment if applicable.
+$ python doggo_heaven/main.py
+```
