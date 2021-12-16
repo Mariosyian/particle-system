@@ -6,7 +6,7 @@ The main instance of the particle system.
 System used:
 - CPU: AMD Ryzen 7 5700U
 - GPU: AMD (Integrated) Radeon Graphics
-- RAM: 1 * 8GB DDR4 @ 3200MHz
+- RAM: 2 * 8GB DDR4 @ 3200MHz
 """
 # Remove the pygame welcome message ...
 from os import environ
@@ -78,6 +78,7 @@ class Doggo_Heaven:
         # is raised.
         GRAVITY_MAGN = 1.0
         LIFETIME = 0
+        ELASTICITY = 0.8
 
         # Sprites
         ## Background
@@ -205,6 +206,29 @@ class Doggo_Heaven:
                     elif FPS == MAX_FPS:
                         FPS = LOW_FPS
 
+                ## Elasticity settings
+                # Decrease elasticity
+                if (
+                    event.type == pygame.KEYUP
+                    and pygame.key.get_mods() & pygame.KMOD_SHIFT
+                    and event.key == pygame.K_e
+                ):
+                    if ELASTICITY > 0.1:
+                        ELASTICITY = float("{:.1f}".format(ELASTICITY - 0.1))
+                        for tennis_ball in tennis_balls:
+                            tennis_ball.set_elasticity(ELASTICITY)
+
+                # Increase elasticity
+                if (
+                    event.type == pygame.KEYUP
+                    and pygame.key.get_mods() & pygame.KMOD_CTRL
+                    and event.key == pygame.K_e
+                ):
+                    if ELASTICITY < 0.9:
+                        ELASTICITY = float("{:.1f}".format(ELASTICITY + 0.1))
+                        for tennis_ball in tennis_balls:
+                            tennis_ball.set_elasticity(ELASTICITY)
+
                 ## Gravity settings
                 # Decrease gravity
                 if (
@@ -243,6 +267,9 @@ class Doggo_Heaven:
                 ):
                     if LIFETIME > 0:
                         LIFETIME -= 1
+                        for tennis_ball in tennis_balls:
+                            tennis_ball.set_lifetime(LIFETIME)
+
                 # Increase lifetime
                 if (
                     event.type == pygame.KEYUP
@@ -250,6 +277,8 @@ class Doggo_Heaven:
                     and event.key == pygame.K_t
                 ):
                     LIFETIME += 1
+                    for tennis_ball in tennis_balls:
+                        tennis_ball.set_lifetime(LIFETIME)
 
                 # Toggle hitboxes
                 if event.type == pygame.KEYUP and event.key == pygame.K_h:
@@ -411,7 +440,7 @@ class Doggo_Heaven:
             )
             self.window.blit(
                 self.sys_font.render(
-                    f"Gravity: {GRAVITY_MAGN} - Increase by pressing 'CTRL + g', or decrease by pressing the 'SHIFT + g' keys",
+                    f"Elasticity: {ELASTICITY} - Increase by pressing 'CTRL + e', or decrease by pressing the 'SHIFT + e' keys",
                     True,
                     self.font_color,
                 ),
@@ -419,7 +448,7 @@ class Doggo_Heaven:
             )
             self.window.blit(
                 self.sys_font.render(
-                    f"Lifetime: {LIFETIME}s - Increase by pressing 'CTRL + t', or decrease by pressing the 'SHIFT + t' keys",
+                    f"Gravity: {GRAVITY_MAGN} - Increase by pressing 'CTRL + g', or decrease by pressing the 'SHIFT + g' keys",
                     True,
                     self.font_color,
                 ),
@@ -427,11 +456,11 @@ class Doggo_Heaven:
             )
             self.window.blit(
                 self.sys_font.render(
-                    f"Does not affect currently rendered balls. Set to 0 for infinite lifetime.",
+                    f"Lifetime: {LIFETIME}s - Increase by pressing 'CTRL + t', or decrease by pressing the 'SHIFT + t' keys",
                     True,
                     self.font_color,
                 ),
-                (105, 80),
+                (10, 80),
             )
             self.window.blit(
                 self.sys_font.render(

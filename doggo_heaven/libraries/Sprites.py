@@ -188,6 +188,24 @@ class Tennis_Ball(Sprite):
             return True
         return False
 
+    def set_lifetime(self, lifetime):
+        """
+        Update the lifetime of the tennis ball, and sets the "born" time, to the time
+        the lifetime was updated.
+
+        :param lifetime: The new lifetime of the tennis ball in seconds.
+        """
+        self.lifetime = lifetime
+        self.born = time_ns()
+
+    def set_elasticity(self, elasticity):
+        """
+        Update the elasticity of the tennis ball.
+
+        :param elasticity: The new elasticity of the tennis ball.
+        """
+        self.elasticity = elasticity
+
 
 class Player(Sprite):
     """
@@ -284,7 +302,7 @@ class Player(Sprite):
 
         Use this right after updating the players sprite to ensure accurate collisions.
         """
-        self.width = self.image.get_get_width()
-        self.height = self.image.get_get_height()
+        self.width = self.image.get_width()
+        self.height = self.image.get_height()
         self.hitbox[2] = self.width + 5
         self.hitbox[3] = self.height + 5
