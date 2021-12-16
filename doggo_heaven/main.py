@@ -416,58 +416,30 @@ class Doggo_Heaven:
             self.tennis_ball_group.draw(self.window)
             self.window.blit(player.image, player_rect)
             # Draw the HUD
-            self.window.blit(
-                self.sys_font.render(
-                    f"FPS: {int(self.clock.get_fps())} - Switch between FPS settings with the 'f' key",
-                    True,
-                    self.font_color,
-                ),
-                (10, 5),
-            )
-            self.window.blit(
-                self.sys_font.render(
-                    f"Move: W, A, S, D -- Jump: Space", True, self.font_color
-                ),
-                (10, 20),
-            )
-            self.window.blit(
-                self.sys_font.render(
-                    f"Tennis Balls: {len(tennis_balls)} - Add/Remove balls with the '+' and '-' keys",
-                    True,
-                    self.font_color,
-                ),
-                (10, 35),
-            )
-            self.window.blit(
-                self.sys_font.render(
-                    f"Elasticity: {ELASTICITY} - Increase by pressing 'CTRL + e', or decrease by pressing the 'SHIFT + e' keys",
-                    True,
-                    self.font_color,
-                ),
-                (10, 50),
-            )
-            self.window.blit(
-                self.sys_font.render(
-                    f"Gravity: {GRAVITY_MAGN} - Increase by pressing 'CTRL + g', or decrease by pressing the 'SHIFT + g' keys",
-                    True,
-                    self.font_color,
-                ),
-                (10, 65),
-            )
-            self.window.blit(
-                self.sys_font.render(
-                    f"Lifetime: {LIFETIME}s - Increase by pressing 'CTRL + t', or decrease by pressing the 'SHIFT + t' keys",
-                    True,
-                    self.font_color,
-                ),
-                (10, 80),
-            )
-            self.window.blit(
-                self.sys_font.render(
-                    f"Toggle hitboxes with the 'h' key", True, self.font_color
-                ),
-                (10, 95),
-            )
+            HUD = {
+                "exit": f"Exit the game by pressing the Q or Esc keys.",
+                "fps": f"FPS: {int(self.clock.get_fps())} - Switch between FPS settings with the 'f' key",
+                "move": f"Move: W, A, S, D -- Jump: Space",
+                "tennis_balls": f"Tennis Balls: {len(tennis_balls)} - Add/Remove balls with the '+' and '-' keys",
+                "elasticity": f"Elasticity: {ELASTICITY} - Increase by pressing 'CTRL + e', or decrease by pressing the 'SHIFT + e' keys",
+                "gravity": f"Gravity: {GRAVITY_MAGN} - Increase by pressing 'CTRL + g', or decrease by pressing the 'SHIFT + g' keys",
+                "lifetime": f"Lifetime: {LIFETIME}s - Increase by pressing 'CTRL + t', or decrease by pressing the 'SHIFT + t' keys",
+                "lifetime_2": f"                        Set to 0 for infinite lifetime",
+                "hitboxes": f"Toggle hitboxes with the 'h' key",
+            }
+            start_x = 10
+            start_y = 5
+            for key in HUD.keys():
+                self.window.blit(
+                    self.sys_font.render(
+                        HUD[key],
+                        True,
+                        self.font_color,
+                    ),
+                    (start_x, start_y),
+                )
+                start_y += 15
+
             # Draw the hitboxes
             if draw_hitboxes:
                 pygame.draw.rect(self.window, colors.RED, player.hitbox, 2)
